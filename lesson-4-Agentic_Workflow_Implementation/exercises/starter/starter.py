@@ -40,13 +40,17 @@ class FactCheckerAgent(Agent):
     def run(self, text: str) -> Dict:
         print(f"✓ {self.name} fact checking...")
         time.sleep(0.5)
-        # TODO: Check if any suspicious keywords are in the text
-        flags = []  # Replace this with real logic
+        # DONE: Check if any suspicious keywords are in the text
+        found_flags = []  # Replace this with real logic
+        text.lower()
+        for keyword in self.suspicious_keywords:
+            if keyword in text:
+                found_flags.append(keyword)
         return {
             "text": text,
             "accuracy": "high",
             "verified_claims": 3,
-            "flags": flags
+            "flags": found_flags
         }
 
 print("=== AGENTIC WORKFLOW DEMO ===")
@@ -59,7 +63,7 @@ summarizer = SummarizerAgent("Summarizer")
 print("\n🚀 Starting 'Information Processing' workflow\n")
 
 # Initial input
-query = "Agentic workflows in AI systems"
+query = "Research results for 'New Drug Efficacy': Found 3 key points, though its long-term effects are debated and somewhat uncertain, with a potential error in early trials."
 
 # Step 1: Research
 research_results = researcher.run(query)
@@ -83,3 +87,16 @@ print("1. Agents as components that perform specific tasks")
 print("2. Workflow connecting agents in sequence")
 print("3. Information flowing through the system")
 print("4. Each agent transforming the data")
+
+if __name__ == "__main__":
+    print("\n=== TESTING ENHANCED FactCheckerAgent ===")
+    test_fact_checker = FactCheckerAgent("Test Enhanced FactChecker")
+    text1 = "This report is clear and all facts are confirmed."
+    result1 = test_fact_checker.run(text1)
+    print(f"Input: '{text1}'\nOutput Flags: {result1['flags']}\n") # Expected: []
+    text2 = "The findings suggest a positive trend, but the outcome is still debated and uncertain due to limited data."
+    result2 = test_fact_checker.run(text2)
+    print(f"Input: '{text2}'\nOutput Flags: {result2['flags']}\n") # Expected: ['debated', 'uncertain']
+    text3 = "An error was found in the preliminary report, making some conclusions uncertain."
+    result3 = test_fact_checker.run(text3)
+    print(f"Input: '{text3}'\nOutput Flags: {result3['flags']}\n") # Expected: ['error', 'uncertain']
