@@ -47,20 +47,52 @@ def pricing_strategist_agent(query, product_data=None, customer_data=None):
     system_prompt = """You are a pricing strategist agent. Your task is to recommend optimal pricing 
     strategies based on product research and customer analysis."""
     
-    # TODO: Implement this function
+    # Done: Implement this function
     # It should use product_data and customer_data to inform the pricing strategy
-    pass  # Replace this with your implementation
+    # Replace this with your implementation
+    user_prompt = f"""
+    Original Pricing Query: {query}
+    Product Research Data:{product_data}
+    Customer Analysis Data:{customer_data}
+    Based on all the above information, please provide a recommended pricing strategy, suggest an
+    optimal price or price range, and explain your reasoning."""
+
+    return call_openai(system_prompt, user_prompt)
 
 
 # --- Routing Agent with LLM-Based Task Determination ---
 def routing_agent(query, *args):
     """Routing agent that determines which agent to use based on the query."""
     
-    # TODO: Implement the routing agent
+    # Done: Implement the routing agent
     # 1. Use an LLM to analyze the query and determine the correct task type
     # 2. Route the query to the appropriate agent
     # 3. Return the results from the chosen agent
-    pass  # Replace this with your implementation
+    # Replace this with your implementation
+    
+    agent_descriptions = "\n".join([f" - {agent.__name__} : {agent.__doc__}" for agent in args])
+    # print(agent_descriptions)
+
+    system_prompt = f"""You are an expert routing agent. your task is to recommend the best agent to run the query.
+    agent descriptions:{agent_descriptions}
+    query:{query}
+    Respond only with the exact agent name (e.g., '{args[0].__name__}'), and nothing else.    
+    """
+
+    user_prompt = f"""Given the query {query}, which is the right agent to handle this? """
+
+    agent_choice_name = call_openai(system_prompt, user_prompt)
+    # print(agent_choice_name)
+
+    for agent in args:
+        if agent.__name__ == agent_choice_name:
+            print(f"--- Routing task to {agent.__name__}... ---")
+            return agent(query)
+
+    return f"Error: Could not find an agent named '{agent_choice_name}'. Please check the routing prompt."
+
+
+
 
 
 # --- Example Usage ---
@@ -71,11 +103,17 @@ if __name__ == "__main__":
         "What do customers think about our premium coffee brand?",
         "What should be the optimal price for our new organic skincare line?"
     ]
+
+    all_agents = [product_researcher_agent, customer_analyzer_agent, pricing_strategist_agent]
+
     
     # Process each query
     for query in queries:
         print(f"\nQuery: {query}")
         print("\nProcessing...")
         
-        # TODO: Use the routing agent to process the query
+        # Done: Use the routing agent to process the query
+        results = routing_agent(query, *all_agents)
         # Print the results
+        print(results)
+        print("\n" + "-"*80)
